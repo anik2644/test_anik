@@ -15,7 +15,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import com.example.test_anik.presentation.screens.HomeScreen
+import androidx.navigation.compose.rememberNavController
+import com.example.test_anik.presentation.navigation.RootNavGraph
 import com.example.test_anik.ui.theme.Test_anikTheme
 
 class MainActivity : ComponentActivity() {
@@ -24,7 +25,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             Test_anikTheme {
-                HomeScreen()
+                RootNavGraph(navController = rememberNavController())
             }
         }
     }

@@ -67,4 +67,5 @@ dependencies {
 
     implementation(libs.material.icons.extended)
     implementation(libs.bundles.room)
+    implementation(libs.navigation.compose)
 }
