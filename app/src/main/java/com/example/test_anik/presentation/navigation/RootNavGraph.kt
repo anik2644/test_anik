@@ -6,6 +6,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.example.test_anik.presentation.screens.MainScreen
 import com.example.test_anik.presentation.screens.ModernLoginScreen1
+import com.example.test_anik.presentation.screens.ModernRegistrationScreen1
 
 @Composable
 fun RootNavGraph(
@@ -23,9 +24,30 @@ fun RootNavGraph(
                             inclusive = true
                         }
                     }
+                },
+                onRegisterClick = {
+                    navController.navigate("register")
                 }
             )
         }
+
+        composable(route = "register") {
+            ModernRegistrationScreen1(
+                onRegisterClick = { _, _, _, _ ->
+                    // After successful registration, navigate to main
+                    navController.navigate("main") {
+                        popUpTo("register") {
+                            inclusive = true
+                        }
+                    }
+                },
+                onLoginClick = {
+                    // Navigate back to login screen
+                    navController.popBackStack()
+                }
+            )
+        }
+
         composable(route = "main") {
             MainScreen(
                 onLogout = {
