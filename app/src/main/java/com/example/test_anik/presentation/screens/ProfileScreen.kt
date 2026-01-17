@@ -3,9 +3,12 @@ package com.example.test_anik.presentation.screens
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -15,21 +18,34 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
 import kotlinx.coroutines.delay
 
 // Data Models
 data class ProfileStats(
     val posts: Int,
     val followers: Int,
-    val following: Int
+    val following: Int,
+    val rating: Float = 4.8f
+)
+
+data class Achievement(
+    val id: Int,
+    val title: String,
+    val icon: ImageVector,
+    val color: Color
 )
 
 data class MenuItem(
@@ -38,7 +54,8 @@ data class MenuItem(
     val icon: ImageVector,
     val subtitle: String? = null,
     val showBadge: Boolean = false,
-    val badgeCount: Int = 0
+    val badgeCount: Int = 0,
+    val gradient: List<Color>
 )
 
 @Composable
@@ -65,130 +82,90 @@ fun ProfileScreen(
             .background(
                 Brush.verticalGradient(
                     colors = listOf(
-                        Color(0xFFDCFCE7),
-                        Color(0xFFD1FAE5),
-                        Color(0xFFBBF7D0)
+                        Color(0xFFFEF3C7),  // Light yellow
+                        Color(0xFFFBCFE8),  // Light pink
+                        Color(0xFFDDD6FE)   // Light purple
                     ),
                     startY = gradientOffset,
                     endY = gradientOffset + 2000f
                 )
             )
     ) {
+        // Floating decorative elements
+        ProfileDecorativeElements()
+
         LazyColumn(
-            modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(bottom = 80.dp)
+            modifier = Modifier
+                .fillMaxSize()
+                .statusBarsPadding(),
+            contentPadding = PaddingValues(top = 16.dp, bottom = 100.dp)
         ) {
-            // Header with Profile
+            // Enhanced Header with Profile
             item {
-                ProfileHeader()
+                EnhancedProfileHeader()
             }
 
-            // Stats Section
+            // Animated Stats Cards
             item {
-                StatsSection(
+                AnimatedStatsSection(
                     stats = ProfileStats(
                         posts = 248,
                         followers = 1205,
-                        following = 567
+                        following = 567,
+                        rating = 4.8f
                     )
                 )
             }
 
-            // Quick Actions
+            // Achievements Section
             item {
-                QuickActionsSection()
+                AchievementsSection()
             }
 
-            // Account Settings Section
+            // Interactive Quick Actions
             item {
-                SectionHeader(title = "Account Settings")
+                InteractiveQuickActions()
             }
 
-            items(getAccountMenuItems()) { menuItem ->
-                var isVisible by remember { mutableStateOf(false) }
-
-                LaunchedEffect(Unit) {
-                    delay(menuItem.id * 50L)
-                    isVisible = true
-                }
-
-                AnimatedVisibility(
-                    visible = isVisible,
-                    enter = fadeIn(animationSpec = tween(400)) +
-                            slideInHorizontally(initialOffsetX = { it / 2 })
-                ) {
-                    MenuItemCard(
-                        menuItem = menuItem,
-                        onClick = {
-                            if (menuItem.id == 1) { // Edit Profile
-                                // Navigate to edit profile
-                            }
+            // Colorful Menu Sections
+            item {
+                ColorfulMenuSection(
+                    title = "🎨 Account",
+                    items = getAccountMenuItems(),
+                    onItemClick = { menuItem ->
+                        if (menuItem.id == 13) {
+                            showLogoutDialog = true
                         }
-                    )
-                }
+                    }
+                )
             }
 
-            // Preferences Section
             item {
-                SectionHeader(title = "Preferences")
+                ColorfulMenuSection(
+                    title = "⚙️ Preferences",
+                    items = getPreferencesMenuItems(),
+                    onItemClick = {}
+                )
             }
 
-            items(getPreferencesMenuItems()) { menuItem ->
-                var isVisible by remember { mutableStateOf(false) }
-
-                LaunchedEffect(Unit) {
-                    delay(menuItem.id * 50L)
-                    isVisible = true
-                }
-
-                AnimatedVisibility(
-                    visible = isVisible,
-                    enter = fadeIn(animationSpec = tween(400)) +
-                            slideInHorizontally(initialOffsetX = { it / 2 })
-                ) {
-                    MenuItemCard(menuItem = menuItem, onClick = {})
-                }
-            }
-
-            // More Section
             item {
-                SectionHeader(title = "More")
+                ColorfulMenuSection(
+                    title = "📱 More",
+                    items = getMoreMenuItems(),
+                    onItemClick = {}
+                )
             }
 
-            items(getMoreMenuItems()) { menuItem ->
-                var isVisible by remember { mutableStateOf(false) }
-
-                LaunchedEffect(Unit) {
-                    delay(menuItem.id * 50L)
-                    isVisible = true
-                }
-
-                AnimatedVisibility(
-                    visible = isVisible,
-                    enter = fadeIn(animationSpec = tween(400)) +
-                            slideInHorizontally(initialOffsetX = { it / 2 })
-                ) {
-                    MenuItemCard(
-                        menuItem = menuItem,
-                        onClick = {
-                            if (menuItem.id == 13) { // Logout
-                                showLogoutDialog = true
-                            }
-                        }
-                    )
-                }
-            }
-
-            // App Info
+            // Vibrant Footer
             item {
-                AppInfoSection()
+                VibrantFooter()
             }
         }
     }
 
-    // Logout Confirmation Dialog
+    // Enhanced Logout Dialog
     if (showLogoutDialog) {
-        LogoutDialog(
+        EnhancedLogoutDialog(
             onDismiss = { showLogoutDialog = false },
             onConfirm = {
                 showLogoutDialog = false
@@ -199,7 +176,61 @@ fun ProfileScreen(
 }
 
 @Composable
-fun ProfileHeader() {
+fun BoxScope.ProfileDecorativeElements() {
+    val infiniteTransition = rememberInfiniteTransition(label = "decorations")
+
+    // Rotating gradient circles
+    val rotation by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = 360f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(20000, easing = LinearEasing),
+            repeatMode = RepeatMode.Restart
+        ),
+        label = "rotation"
+    )
+
+    // Top-left colorful blob
+    Box(
+        modifier = Modifier
+            .size(200.dp)
+            .offset(x = (-50).dp, y = 50.dp)
+            .rotate(rotation)
+            .blur(50.dp)
+            .background(
+                Brush.radialGradient(
+                    colors = listOf(
+                        Color(0xFFFF6B9D).copy(alpha = 0.3f),
+                        Color(0xFFFEA400).copy(alpha = 0.2f),
+                        Color.Transparent
+                    )
+                )
+            )
+            .align(Alignment.TopStart)
+    )
+
+    // Top-right colorful blob
+    Box(
+        modifier = Modifier
+            .size(180.dp)
+            .offset(x = 50.dp, y = (-30).dp)
+            .rotate(-rotation)
+            .blur(40.dp)
+            .background(
+                Brush.radialGradient(
+                    colors = listOf(
+                        Color(0xFF6366F1).copy(alpha = 0.3f),
+                        Color(0xFF8B5CF6).copy(alpha = 0.2f),
+                        Color.Transparent
+                    )
+                )
+            )
+            .align(Alignment.TopEnd)
+    )
+}
+
+@Composable
+fun EnhancedProfileHeader() {
     var isVisible by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
@@ -209,239 +240,572 @@ fun ProfileHeader() {
 
     AnimatedVisibility(
         visible = isVisible,
-        enter = fadeIn(animationSpec = tween(600)) + scaleIn(initialScale = 0.8f)
+        enter = fadeIn(animationSpec = tween(800)) + scaleIn(initialScale = 0.9f)
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .statusBarsPadding()
-                .padding(24.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+                .statusBarsPadding() // This ensures it starts below the status bar
+                .padding(top = 20.dp, start = 20.dp, end = 20.dp, bottom = 20.dp)
         ) {
-            // Animated Profile Picture
-            val scale by rememberInfiniteTransition(label = "profile").animateFloat(
-                initialValue = 1f,
-                targetValue = 1.05f,
-                animationSpec = infiniteRepeatable(
-                    animation = tween(2000, easing = FastOutSlowInEasing),
-                    repeatMode = RepeatMode.Reverse
-                ),
-                label = "scale"
-            )
-
+            // Profile Picture with Animation
             Box(
                 modifier = Modifier
-                    .size(120.dp)
-                    .scale(scale)
+                    .fillMaxWidth(),
+                contentAlignment = Alignment.Center
             ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .clip(CircleShape)
-                        .background(
-                            Brush.linearGradient(
-                                colors = listOf(
-                                    Color(0xFF10B981),
-                                    Color(0xFF059669)
-                                )
-                            )
-                        ),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = "M",
-                        fontSize = 48.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.White
-                    )
-                }
+                val scale by rememberInfiniteTransition(label = "profile").animateFloat(
+                    initialValue = 1f,
+                    targetValue = 1.05f,
+                    animationSpec = infiniteRepeatable(
+                        animation = tween(2000, easing = FastOutSlowInEasing),
+                        repeatMode = RepeatMode.Reverse
+                    ),
+                    label = "scale"
+                )
 
-                // Online Status Indicator
                 Box(
-                    modifier = Modifier
-                        .size(28.dp)
-                        .align(Alignment.BottomEnd)
-                        .clip(CircleShape)
-                        .background(Color.White)
-                        .padding(4.dp)
+                    modifier = Modifier.scale(scale)
                 ) {
+                    // Outer glow effect
                     Box(
                         modifier = Modifier
-                            .fillMaxSize()
+                            .size(140.dp)
                             .clip(CircleShape)
-                            .background(Color(0xFF10B981))
+                            .background(
+                                Brush.radialGradient(
+                                    colors = listOf(
+                                        Color(0xFF6366F1).copy(alpha = 0.3f),
+                                        Color.Transparent
+                                    )
+                                )
+                            )
                     )
+
+                    // Profile picture
+                    Box(
+                        modifier = Modifier
+                            .size(130.dp)
+                            .align(Alignment.Center)
+                    ) {
+                        // White border with shadow
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .clip(CircleShape)
+                                .background(Color.White)
+                                .padding(5.dp)
+                        ) {
+                            AsyncImage(
+                                model = "https://imageio.forbes.com/specials-images/imageserve/663e595b4509f97fdafb95f5/0x0.jpg?format=jpg&crop=383,383,x1045,y23,safe&height=416&width=416&fit=bounds",
+                                contentDescription = "Profile Picture",
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .clip(CircleShape),
+                                contentScale = ContentScale.Crop
+                            )
+                        }
+
+                        // Premium badge on profile
+                        Box(
+                            modifier = Modifier
+                                .size(36.dp)
+                                .align(Alignment.BottomEnd)
+                                .clip(CircleShape)
+                                .background(
+                                    Brush.linearGradient(
+                                        colors = listOf(
+                                            Color(0xFFFBBF24),
+                                            Color(0xFFF59E0B)
+                                        )
+                                    )
+                                )
+                                .border(3.dp, Color.White, CircleShape),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Star,
+                                contentDescription = null,
+                                tint = Color.White,
+                                modifier = Modifier.size(20.dp)
+                            )
+                        }
+                    }
                 }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(24.dp))
 
-            Text(
-                text = "Abdullah Al Mahmud",
-                fontSize = 24.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color(0xFF1F2937)
-            )
-
-            Text(
-                text = "anik@example.com",
-                fontSize = 14.sp,
-                color = Color(0xFF6B7280),
-                modifier = Modifier.padding(top = 4.dp)
-            )
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            // Verified Badge
-            Row(
-                modifier = Modifier
-                    .clip(RoundedCornerShape(20.dp))
-                    .background(Color(0xFF10B981).copy(alpha = 0.15f))
-                    .padding(horizontal = 16.dp, vertical = 8.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(6.dp)
+            // User Information Card
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(24.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = Color.White.copy(alpha = 0.95f)
+                ),
+                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
             ) {
-                Icon(
-                    imageVector = Icons.Default.CheckCircle,
-                    contentDescription = null,
-                    tint = Color(0xFF10B981),
-                    modifier = Modifier.size(16.dp)
-                )
-                Text(
-                    text = "Verified Account",
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    color = Color(0xFF047857)
-                )
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(24.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    // Name Section
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        Text(
+                            text = "Abdullah Al Mahmud",
+                            fontSize = 26.sp,
+                            fontWeight = FontWeight.ExtraBold,
+                            color = Color(0xFF1F2937),
+                            textAlign = TextAlign.Center
+                        )
+
+                        // Role/Title
+                        Text(
+                            text = "Premium Member",
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = Color(0xFF6366F1),
+                            textAlign = TextAlign.Center
+                        )
+                    }
+
+                    Divider(
+                        modifier = Modifier.padding(horizontal = 20.dp),
+                        color = Color(0xFFE5E7EB)
+                    )
+
+                    // Contact Information
+                    Column(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        // Email
+                        ContactInfoRow(
+                            icon = Icons.Default.Email,
+                            label = "Email",
+                            value = "anik@example.com",
+                            iconColor = Color(0xFFEF4444)
+                        )
+
+                        // Phone (optional - you can add this)
+                        ContactInfoRow(
+                            icon = Icons.Default.Phone,
+                            label = "Phone",
+                            value = "+880 1712-345678",
+                            iconColor = Color(0xFF10B981)
+                        )
+
+                        // Location (optional)
+                        ContactInfoRow(
+                            icon = Icons.Default.LocationOn,
+                            label = "Location",
+                            value = "Dhaka, Bangladesh",
+                            iconColor = Color(0xFF3B82F6)
+                        )
+                    }
+
+                    Divider(
+                        modifier = Modifier.padding(horizontal = 20.dp),
+                        color = Color(0xFFE5E7EB)
+                    )
+
+                    // Status Badges
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        StatusBadge(
+                            icon = Icons.Default.CheckCircle,
+                            text = "Verified",
+                            gradient = listOf(Color(0xFF10B981), Color(0xFF059669)),
+                            modifier = Modifier.weight(1f)
+                        )
+                        StatusBadge(
+                            icon = Icons.Default.Star,
+                            text = "Premium",
+                            gradient = listOf(Color(0xFFFBBF24), Color(0xFFF59E0B)),
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+                }
             }
         }
     }
 }
 
 @Composable
-fun StatsSection(stats: ProfileStats) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 24.dp, vertical = 8.dp),
-        shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(20.dp),
-            horizontalArrangement = Arrangement.SpaceEvenly
-        ) {
-            StatItem(label = "Posts", value = stats.posts.toString())
-            VerticalDivider(height = 50.dp)
-            StatItem(label = "Followers", value = formatNumber(stats.followers))
-            VerticalDivider(height = 50.dp)
-            StatItem(label = "Following", value = formatNumber(stats.following))
-        }
-    }
-}
-
-@Composable
-fun StatItem(label: String, value: String) {
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(4.dp)
-    ) {
-        Text(
-            text = value,
-            fontSize = 22.sp,
-            fontWeight = FontWeight.Bold,
-            color = Color(0xFF1F2937)
-        )
-        Text(
-            text = label,
-            fontSize = 13.sp,
-            color = Color(0xFF6B7280)
-        )
-    }
-}
-
-@Composable
-fun VerticalDivider(height: androidx.compose.ui.unit.Dp = 40.dp) {
-    Box(
-        modifier = Modifier
-            .width(1.dp)
-            .height(height)
-            .background(Color(0xFFE5E7EB))
-    )
-}
-
-@Composable
-fun QuickActionsSection() {
+fun ContactInfoRow(
+    icon: ImageVector,
+    label: String,
+    value: String,
+    iconColor: Color
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 24.dp, vertical = 16.dp),
+            .clip(RoundedCornerShape(12.dp))
+            .background(Color(0xFFF9FAFB))
+            .padding(12.dp),
+        verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        QuickActionButton(
-            icon = Icons.Default.Edit,
-            label = "Edit Profile",
-            color = Color(0xFF10B981),
-            modifier = Modifier.weight(1f),
-            onClick = {}
-        )
-        QuickActionButton(
-            icon = Icons.Default.Share,
-            label = "Share Profile",
-            color = Color(0xFF3B82F6),
-            modifier = Modifier.weight(1f),
-            onClick = {}
+        Box(
+            modifier = Modifier
+                .size(40.dp)
+                .clip(RoundedCornerShape(10.dp))
+                .background(iconColor.copy(alpha = 0.15f)),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = iconColor,
+                modifier = Modifier.size(20.dp)
+            )
+        }
+
+        Column(
+            modifier = Modifier.weight(1f)
+        ) {
+            Text(
+                text = label,
+                fontSize = 11.sp,
+                fontWeight = FontWeight.Medium,
+                color = Color(0xFF9CA3AF)
+            )
+            Text(
+                text = value,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = Color(0xFF1F2937)
+            )
+        }
+
+        Icon(
+            imageVector = Icons.Default.ContentCopy,
+            contentDescription = "Copy",
+            tint = Color(0xFF9CA3AF),
+            modifier = Modifier
+                .size(18.dp)
+                .clickable { /* Copy to clipboard */ }
         )
     }
 }
 
 @Composable
-fun QuickActionButton(
+fun StatusBadge(
     icon: ImageVector,
-    label: String,
-    color: Color,
-    modifier: Modifier = Modifier,
-    onClick: () -> Unit
+    text: String,
+    gradient: List<Color>,
+    modifier: Modifier = Modifier
 ) {
-    Button(
-        onClick = onClick,
-        modifier = modifier.height(56.dp),
-        colors = ButtonDefaults.buttonColors(
-            containerColor = Color.Transparent
+    Box(
+        modifier = modifier
+            .height(44.dp)
+            .clip(RoundedCornerShape(12.dp))
+            .background(Brush.horizontalGradient(gradient)),
+        contentAlignment = Alignment.Center
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(6.dp)
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = Color.White,
+                modifier = Modifier.size(16.dp)
+            )
+            Text(
+                text = text,
+                fontSize = 13.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color.White
+            )
+        }
+    }
+}
+
+@Composable
+fun AnimatedStatsSection(stats: ProfileStats) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 20.dp)
+            .padding(top = 20.dp),
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        AnimatedStatCard(
+            value = stats.posts.toString(),
+            label = "Posts",
+            icon = Icons.Default.Article,
+            gradient = listOf(Color(0xFFFF6B9D), Color(0xFFFF8E8E)),
+            modifier = Modifier.weight(1f)
+        )
+        AnimatedStatCard(
+            value = formatNumber(stats.followers),
+            label = "Followers",
+            icon = Icons.Default.People,
+            gradient = listOf(Color(0xFF6366F1), Color(0xFF8B5CF6)),
+            modifier = Modifier.weight(1f)
+        )
+        AnimatedStatCard(
+            value = formatNumber(stats.following),
+            label = "Following",
+            icon = Icons.Default.PersonAdd,
+            gradient = listOf(Color(0xFFFBBF24), Color(0xFFF59E0B)),
+            modifier = Modifier.weight(1f)
+        )
+    }
+}
+
+@Composable
+fun AnimatedStatCard(
+    value: String,
+    label: String,
+    icon: ImageVector,
+    gradient: List<Color>,
+    modifier: Modifier = Modifier
+) {
+    var isVisible by remember { mutableStateOf(false) }
+
+    LaunchedEffect(Unit) {
+        delay(200)
+        isVisible = true
+    }
+
+    AnimatedVisibility(
+        visible = isVisible,
+        enter = fadeIn(animationSpec = tween(600)) +
+                slideInVertically(initialOffsetY = { it / 2 }),
+        modifier = modifier
+    ) {
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(110.dp),
+            shape = RoundedCornerShape(20.dp),
+            colors = CardDefaults.cardColors(containerColor = Color.Transparent),
+            elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Brush.linearGradient(gradient))
+                    .padding(16.dp)
+            ) {
+                Column(
+                    modifier = Modifier.fillMaxSize(),
+                    verticalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Icon(
+                        imageVector = icon,
+                        contentDescription = null,
+                        tint = Color.White.copy(alpha = 0.9f),
+                        modifier = Modifier.size(28.dp)
+                    )
+
+                    Column {
+                        Text(
+                            text = value,
+                            fontSize = 24.sp,
+                            fontWeight = FontWeight.ExtraBold,
+                            color = Color.White
+                        )
+                        Text(
+                            text = label,
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Medium,
+                            color = Color.White.copy(alpha = 0.9f)
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun AchievementsSection() {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 20.dp)
+            .padding(top = 24.dp)
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "🏆 Achievements",
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color(0xFF1F2937)
+            )
+            Text(
+                text = "View All",
+                fontSize = 13.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = Color(0xFF6366F1),
+                modifier = Modifier.clickable { }
+            )
+        }
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        LazyRow(
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            items(getAchievements()) { achievement ->
+                AchievementBadge(achievement)
+            }
+        }
+    }
+}
+
+@Composable
+fun AchievementBadge(achievement: Achievement) {
+    Card(
+        modifier = Modifier
+            .size(80.dp)
+            .clickable { },
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = achievement.color.copy(alpha = 0.15f)
         ),
-        contentPadding = PaddingValues(0.dp),
-        shape = RoundedCornerShape(14.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+    ) {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = achievement.icon,
+                contentDescription = achievement.title,
+                tint = achievement.color,
+                modifier = Modifier.size(36.dp)
+            )
+        }
+    }
+}
+
+@Composable
+fun InteractiveQuickActions() {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 20.dp)
+            .padding(top = 24.dp)
+    ) {
+        Text(
+            text = "⚡ Quick Actions",
+            fontSize = 20.sp,
+            fontWeight = FontWeight.Bold,
+            color = Color(0xFF1F2937)
+        )
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            InteractiveActionCard(
+                icon = Icons.Default.Edit,
+                title = "Edit Profile",
+                gradient = listOf(Color(0xFF10B981), Color(0xFF059669)),
+                modifier = Modifier.weight(1f)
+            )
+            InteractiveActionCard(
+                icon = Icons.Default.Settings,
+                title = "Settings",
+                gradient = listOf(Color(0xFF3B82F6), Color(0xFF2563EB)),
+                modifier = Modifier.weight(1f)
+            )
+        }
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            InteractiveActionCard(
+                icon = Icons.Default.Share,
+                title = "Share",
+                gradient = listOf(Color(0xFFEC4899), Color(0xFFDB2777)),
+                modifier = Modifier.weight(1f)
+            )
+            InteractiveActionCard(
+                icon = Icons.Default.QrCode,
+                title = "QR Code",
+                gradient = listOf(Color(0xFFF59E0B), Color(0xFFD97706)),
+                modifier = Modifier.weight(1f)
+            )
+        }
+    }
+}
+
+@Composable
+fun InteractiveActionCard(
+    icon: ImageVector,
+    title: String,
+    gradient: List<Color>,
+    modifier: Modifier = Modifier
+) {
+    var isPressed by remember { mutableStateOf(false) }
+    val scale by animateFloatAsState(
+        targetValue = if (isPressed) 0.95f else 1f,
+        animationSpec = spring(
+            dampingRatio = Spring.DampingRatioMediumBouncy,
+            stiffness = Spring.StiffnessLow
+        ),
+        label = "scale"
+    )
+
+    Card(
+        modifier = modifier
+            .height(90.dp)
+            .scale(scale)
+            .clickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = null
+            ) {
+                isPressed = !isPressed
+            },
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.Transparent),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(
-                    Brush.horizontalGradient(
-                        colors = listOf(
-                            color,
-                            color.copy(alpha = 0.8f)
-                        )
-                    )
-                ),
-            contentAlignment = Alignment.Center
+                .background(Brush.linearGradient(gradient))
+                .padding(16.dp),
+            contentAlignment = Alignment.CenterStart
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 Icon(
                     imageVector = icon,
                     contentDescription = null,
                     tint = Color.White,
-                    modifier = Modifier.size(20.dp)
+                    modifier = Modifier.size(32.dp)
                 )
                 Text(
-                    text = label,
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.SemiBold,
+                    text = title,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold,
                     color = Color.White
                 )
             }
@@ -450,84 +814,124 @@ fun QuickActionButton(
 }
 
 @Composable
-fun SectionHeader(title: String) {
-    Text(
-        text = title,
-        fontSize = 16.sp,
-        fontWeight = FontWeight.Bold,
-        color = Color(0xFF374151),
-        modifier = Modifier.padding(horizontal = 24.dp, vertical = 16.dp)
-    )
+fun ColorfulMenuSection(
+    title: String,
+    items: List<MenuItem>,
+    onItemClick: (MenuItem) -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 20.dp)
+            .padding(top = 24.dp)
+    ) {
+        Text(
+            text = title,
+            fontSize = 20.sp,
+            fontWeight = FontWeight.Bold,
+            color = Color(0xFF1F2937)
+        )
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        items.forEach { menuItem ->
+            var isVisible by remember { mutableStateOf(false) }
+
+            LaunchedEffect(Unit) {
+                delay(menuItem.id * 30L)
+                isVisible = true
+            }
+
+            AnimatedVisibility(
+                visible = isVisible,
+                enter = fadeIn(animationSpec = tween(400)) +
+                        slideInHorizontally(initialOffsetX = { it / 3 })
+            ) {
+                ColorfulMenuItem(
+                    menuItem = menuItem,
+                    onClick = { onItemClick(menuItem) }
+                )
+                Spacer(modifier = Modifier.height(10.dp))
+            }
+        }
+    }
 }
 
 @Composable
-fun MenuItemCard(
+fun ColorfulMenuItem(
     menuItem: MenuItem,
     onClick: () -> Unit
 ) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 24.dp, vertical = 6.dp)
-            .clickable { onClick() },
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+            .clickable(onClick = onClick),
+        shape = RoundedCornerShape(18.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.9f)),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
+            horizontalArrangement = Arrangement.spacedBy(14.dp)
         ) {
-            // Icon
+            // Gradient icon background
             Box(
                 modifier = Modifier
-                    .size(44.dp)
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(getIconBackgroundColor(menuItem.id)),
+                    .size(52.dp)
+                    .clip(RoundedCornerShape(14.dp))
+                    .background(Brush.linearGradient(menuItem.gradient)),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
                     imageVector = menuItem.icon,
                     contentDescription = null,
-                    tint = getIconColor(menuItem.id),
-                    modifier = Modifier.size(22.dp)
+                    tint = Color.White,
+                    modifier = Modifier.size(26.dp)
                 )
             }
 
-            // Title and Subtitle
+            // Content
             Column(
                 modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(2.dp)
+                verticalArrangement = Arrangement.spacedBy(3.dp)
             ) {
                 Text(
                     text = menuItem.title,
-                    fontSize = 15.sp,
+                    fontSize = 16.sp,
                     fontWeight = FontWeight.SemiBold,
                     color = Color(0xFF1F2937)
                 )
-                menuItem.subtitle?.let { subtitle ->
+                menuItem.subtitle?.let {
                     Text(
-                        text = subtitle,
+                        text = it,
                         fontSize = 12.sp,
-                        color = Color(0xFF9CA3AF)
+                        color = Color(0xFF9CA3AF),
+                        maxLines = 1
                     )
                 }
             }
 
-            // Badge or Arrow
+            // Badge or arrow
             if (menuItem.showBadge && menuItem.badgeCount > 0) {
                 Box(
                     modifier = Modifier
-                        .clip(CircleShape)
-                        .background(Color(0xFFEF4444))
-                        .padding(horizontal = 8.dp, vertical = 4.dp)
+                        .clip(RoundedCornerShape(10.dp))
+                        .background(
+                            Brush.linearGradient(
+                                colors = listOf(
+                                    Color(0xFFEF4444),
+                                    Color(0xFFDC2626)
+                                )
+                            )
+                        )
+                        .padding(horizontal = 10.dp, vertical = 6.dp)
                 ) {
                     Text(
                         text = menuItem.badgeCount.toString(),
-                        fontSize = 11.sp,
+                        fontSize = 12.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color.White
                     )
@@ -537,7 +941,7 @@ fun MenuItemCard(
                     imageVector = Icons.Default.ChevronRight,
                     contentDescription = null,
                     tint = Color(0xFF9CA3AF),
-                    modifier = Modifier.size(20.dp)
+                    modifier = Modifier.size(24.dp)
                 )
             }
         }
@@ -545,82 +949,169 @@ fun MenuItemCard(
 }
 
 @Composable
-fun AppInfoSection() {
+fun VibrantFooter() {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(24.dp),
+            .padding(horizontal = 20.dp)
+            .padding(top = 32.dp, bottom = 20.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(8.dp)
+        verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
+        // Social media icons
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            SocialMediaIcon(
+                icon = Icons.Default.Facebook,
+                color = Color(0xFF4267B2)
+            )
+            SocialMediaIcon(
+                icon = Icons.Default.Share,
+                color = Color(0xFF1DA1F2)
+            )
+            SocialMediaIcon(
+                icon = Icons.Default.Email,
+                color = Color(0xFFEA4335)
+            )
+            SocialMediaIcon(
+                icon = Icons.Default.Link,
+                color = Color(0xFF0A66C2)
+            )
+        }
+
         Text(
-            text = "App Version 1.0.0",
+            text = "Version 1.0.0",
             fontSize = 12.sp,
-            color = Color(0xFF9CA3AF)
+            color = Color(0xFF9CA3AF),
+            fontWeight = FontWeight.Medium
         )
+
         Text(
-            text = "© 2026 Test Anik. All rights reserved.",
-            fontSize = 11.sp,
-            color = Color(0xFF9CA3AF)
+            text = "Made with ❤️ in Bangladesh",
+            fontSize = 13.sp,
+            color = Color(0xFF6B7280),
+            fontWeight = FontWeight.SemiBold
         )
     }
 }
 
 @Composable
-fun LogoutDialog(
+fun SocialMediaIcon(icon: ImageVector, color: Color) {
+    Box(
+        modifier = Modifier
+            .size(44.dp)
+            .clip(CircleShape)
+            .background(color.copy(alpha = 0.15f))
+            .clickable { },
+        contentAlignment = Alignment.Center
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            tint = color,
+            modifier = Modifier.size(22.dp)
+        )
+    }
+}
+
+@Composable
+fun EnhancedLogoutDialog(
     onDismiss: () -> Unit,
     onConfirm: () -> Unit
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
         containerColor = Color.White,
-        shape = RoundedCornerShape(20.dp),
+        shape = RoundedCornerShape(28.dp),
         icon = {
             Box(
                 modifier = Modifier
-                    .size(64.dp)
+                    .size(80.dp)
                     .clip(CircleShape)
-                    .background(Color(0xFFEF4444).copy(alpha = 0.1f)),
+                    .background(
+                        Brush.linearGradient(
+                            colors = listOf(
+                                Color(0xFFEF4444),
+                                Color(0xFFDC2626)
+                            )
+                        )
+                    ),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
                     imageVector = Icons.Default.Logout,
                     contentDescription = null,
-                    tint = Color(0xFFEF4444),
-                    modifier = Modifier.size(32.dp)
+                    tint = Color.White,
+                    modifier = Modifier.size(36.dp)
                 )
             }
         },
         title = {
             Text(
-                text = "Logout",
-                fontSize = 20.sp,
+                text = "Logout?",
+                fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color(0xFF1F2937)
+                color = Color(0xFF1F2937),
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth()
             )
         },
         text = {
             Text(
-                text = "Are you sure you want to logout from your account?",
+                text = "Are you sure you want to logout? You'll need to login again to access your account.",
                 fontSize = 14.sp,
                 color = Color(0xFF6B7280),
+                textAlign = TextAlign.Center,
                 lineHeight = 20.sp
             )
         },
         confirmButton = {
             Button(
                 onClick = onConfirm,
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFFEF4444)
-                ),
-                shape = RoundedCornerShape(12.dp)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(50.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
+                contentPadding = PaddingValues(0.dp),
+                shape = RoundedCornerShape(14.dp)
             ) {
-                Text("Yes, Logout")
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(
+                            Brush.horizontalGradient(
+                                colors = listOf(
+                                    Color(0xFFEF4444),
+                                    Color(0xFFDC2626)
+                                )
+                            )
+                        ),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        "Yes, Logout",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 16.sp
+                    )
+                }
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text("Cancel", color = Color(0xFF6B7280))
+            OutlinedButton(
+                onClick = onDismiss,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(50.dp),
+                shape = RoundedCornerShape(14.dp),
+                border = androidx.compose.foundation.BorderStroke(2.dp, Color(0xFFE5E7EB))
+            ) {
+                Text(
+                    "Cancel",
+                    color = Color(0xFF6B7280),
+                    fontWeight = FontWeight.SemiBold,
+                    fontSize = 16.sp
+                )
             }
         }
     )
@@ -635,42 +1126,14 @@ fun formatNumber(number: Int): String {
     }
 }
 
-fun getIconBackgroundColor(id: Int): Color {
-    return when (id) {
-        1 -> Color(0xFF10B981).copy(alpha = 0.15f)
-        2 -> Color(0xFF3B82F6).copy(alpha = 0.15f)
-        3 -> Color(0xFFF59E0B).copy(alpha = 0.15f)
-        4 -> Color(0xFF8B5CF6).copy(alpha = 0.15f)
-        5 -> Color(0xFF06B6D4).copy(alpha = 0.15f)
-        6 -> Color(0xFFEC4899).copy(alpha = 0.15f)
-        7 -> Color(0xFF6366F1).copy(alpha = 0.15f)
-        8 -> Color(0xFFF97316).copy(alpha = 0.15f)
-        9 -> Color(0xFF14B8A6).copy(alpha = 0.15f)
-        10 -> Color(0xFFA855F7).copy(alpha = 0.15f)
-        11 -> Color(0xFF84CC16).copy(alpha = 0.15f)
-        12 -> Color(0xFF64748B).copy(alpha = 0.15f)
-        13 -> Color(0xFFEF4444).copy(alpha = 0.15f)
-        else -> Color(0xFF9CA3AF).copy(alpha = 0.15f)
-    }
-}
-
-fun getIconColor(id: Int): Color {
-    return when (id) {
-        1 -> Color(0xFF10B981)
-        2 -> Color(0xFF3B82F6)
-        3 -> Color(0xFFF59E0B)
-        4 -> Color(0xFF8B5CF6)
-        5 -> Color(0xFF06B6D4)
-        6 -> Color(0xFFEC4899)
-        7 -> Color(0xFF6366F1)
-        8 -> Color(0xFFF97316)
-        9 -> Color(0xFF14B8A6)
-        10 -> Color(0xFFA855F7)
-        11 -> Color(0xFF84CC16)
-        12 -> Color(0xFF64748B)
-        13 -> Color(0xFFEF4444)
-        else -> Color(0xFF9CA3AF)
-    }
+fun getAchievements(): List<Achievement> {
+    return listOf(
+        Achievement(1, "Early Bird", Icons.Default.WbSunny, Color(0xFFFBBF24)),
+        Achievement(2, "Top Seller", Icons.Default.TrendingUp, Color(0xFF10B981)),
+        Achievement(3, "5 Star", Icons.Default.Star, Color(0xFFEF4444)),
+        Achievement(4, "Popular", Icons.Default.Favorite, Color(0xFFEC4899)),
+        Achievement(5, "Verified", Icons.Default.CheckCircle, Color(0xFF6366F1))
+    )
 }
 
 // Menu Items Data
@@ -679,28 +1142,32 @@ fun getAccountMenuItems(): List<MenuItem> {
         MenuItem(
             id = 1,
             title = "Edit Profile",
-            subtitle = "Update your personal information",
-            icon = Icons.Default.Person
+            subtitle = "Update your information",
+            icon = Icons.Default.Person,
+            gradient = listOf(Color(0xFF10B981), Color(0xFF059669))
         ),
         MenuItem(
             id = 2,
             title = "My Listings",
-            subtitle = "View your posted properties",
+            subtitle = "Manage your properties",
             icon = Icons.Default.Home,
             showBadge = true,
-            badgeCount = 5
+            badgeCount = 5,
+            gradient = listOf(Color(0xFFEF4444), Color(0xFFDC2626))
         ),
         MenuItem(
             id = 3,
             title = "Saved Items",
-            subtitle = "Your favorite properties",
-            icon = Icons.Default.Favorite
+            subtitle = "Your favorites",
+            icon = Icons.Default.Favorite,
+            gradient = listOf(Color(0xFFEC4899), Color(0xFFDB2777))
         ),
         MenuItem(
             id = 4,
             title = "Payment Methods",
-            subtitle = "Manage payment options",
-            icon = Icons.Default.CreditCard
+            subtitle = "Manage payments",
+            icon = Icons.Default.CreditCard,
+            gradient = listOf(Color(0xFF8B5CF6), Color(0xFF7C3AED))
         )
     )
 }
@@ -710,26 +1177,30 @@ fun getPreferencesMenuItems(): List<MenuItem> {
         MenuItem(
             id = 5,
             title = "Notifications",
-            subtitle = "Manage notification settings",
-            icon = Icons.Default.Notifications
+            subtitle = "Manage alerts",
+            icon = Icons.Default.Notifications,
+            gradient = listOf(Color(0xFFF59E0B), Color(0xFFD97706))
         ),
         MenuItem(
             id = 6,
             title = "Privacy & Security",
-            subtitle = "Control your privacy settings",
-            icon = Icons.Default.Lock
+            subtitle = "Control privacy",
+            icon = Icons.Default.Lock,
+            gradient = listOf(Color(0xFF3B82F6), Color(0xFF2563EB))
         ),
         MenuItem(
             id = 7,
             title = "Language",
             subtitle = "English (US)",
-            icon = Icons.Default.Language
+            icon = Icons.Default.Language,
+            gradient = listOf(Color(0xFF06B6D4), Color(0xFF0891B2))
         ),
         MenuItem(
             id = 8,
             title = "Theme",
-            subtitle = "Light mode",
-            icon = Icons.Default.Brightness6
+            subtitle = "Customize appearance",
+            icon = Icons.Default.Palette,
+            gradient = listOf(Color(0xFFA855F7), Color(0xFF9333EA))
         )
     )
 }
@@ -739,32 +1210,37 @@ fun getMoreMenuItems(): List<MenuItem> {
         MenuItem(
             id = 9,
             title = "Help & Support",
-            subtitle = "Get help with your account",
-            icon = Icons.Default.Help
+            subtitle = "Get assistance",
+            icon = Icons.Default.Help,
+            gradient = listOf(Color(0xFF14B8A6), Color(0xFF0D9488))
         ),
         MenuItem(
             id = 10,
             title = "Terms & Conditions",
             subtitle = "Read our terms",
-            icon = Icons.Default.Description
+            icon = Icons.Default.Description,
+            gradient = listOf(Color(0xFF84CC16), Color(0xFF65A30D))
         ),
         MenuItem(
             id = 11,
             title = "Rate Us",
-            subtitle = "Share your feedback",
-            icon = Icons.Default.Star
+            subtitle = "Share feedback",
+            icon = Icons.Default.Star,
+            gradient = listOf(Color(0xFFFBBF24), Color(0xFFF59E0B))
         ),
         MenuItem(
             id = 12,
             title = "About",
-            subtitle = "Learn more about us",
-            icon = Icons.Default.Info
+            subtitle = "Learn more",
+            icon = Icons.Default.Info,
+            gradient = listOf(Color(0xFF64748B), Color(0xFF475569))
         ),
         MenuItem(
             id = 13,
             title = "Logout",
-            subtitle = "Sign out from your account",
-            icon = Icons.Default.Logout
+            subtitle = "Sign out",
+            icon = Icons.Default.Logout,
+            gradient = listOf(Color(0xFFEF4444), Color(0xFFDC2626))
         )
     )
 }

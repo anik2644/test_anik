@@ -2,6 +2,7 @@ package com.example.test_anik.presentation.screens
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -18,17 +19,34 @@ import com.example.test_anik.presentation.navigation.BottomBarScreen
 
 @Composable
 fun MainScreen(
-    onLogout: () -> Unit = {}  // Add this parameter
+    onLogout: () -> Unit = {}
 ) {
     val navController = rememberNavController()
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = navBackStackEntry?.destination?.route
+
+    // Hide bottom bar for Chat screen
+    val showBottomBar = currentRoute != BottomBarScreen.Chat.route
 
     Scaffold(
-        bottomBar = { BottomBar(navController = navController) }
+        bottomBar = {
+            if (showBottomBar) {
+                BottomBar(navController = navController)
+            }
+        }
     ) { paddingValues ->
-        Box(modifier = Modifier.padding(paddingValues)) {
+        // For Chat screen, use fillMaxSize without padding
+        // For other screens, apply the scaffold padding
+        Box(
+            modifier = if (currentRoute == BottomBarScreen.Chat.route) {
+                Modifier.fillMaxSize()
+            } else {
+                Modifier.padding(paddingValues)
+            }
+        ) {
             BottomBarNavGraph(
                 navController = navController,
-                onLogout = onLogout  // Pass it to BottomBarNavGraph
+                onLogout = onLogout
             )
         }
     }
@@ -45,16 +63,13 @@ fun BottomBar(navController: NavHostController) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
 
-    val bottomBarDestination = screens.any { it.route == currentDestination?.route }
-    if (bottomBarDestination) {
-        NavigationBar {
-            screens.forEach { screen ->
-                AddItem(
-                    screen = screen,
-                    currentDestination = currentDestination,
-                    navController = navController
-                )
-            }
+    NavigationBar {
+        screens.forEach { screen ->
+            AddItem(
+                screen = screen,
+                currentDestination = currentDestination,
+                navController = navController
+            )
         }
     }
 }

@@ -59,13 +59,13 @@ fun SignUpScreen(
     var isLoading by remember { mutableStateOf(false) }
     val scrollState = rememberScrollState()
 
-    // Animated background
+    // Animated background - matching HomeScreen theme
     val infiniteTransition = rememberInfiniteTransition(label = "background")
     val gradientOffset by infiniteTransition.animateFloat(
         initialValue = 0f,
         targetValue = 1000f,
         animationSpec = infiniteRepeatable(
-            animation = tween(8000, easing = LinearEasing),
+            animation = tween(10000, easing = LinearEasing),
             repeatMode = RepeatMode.Reverse
         ),
         label = "gradient"
@@ -77,9 +77,9 @@ fun SignUpScreen(
             .background(
                 Brush.verticalGradient(
                     colors = listOf(
-                        Color(0xFF1A1B3E),
-                        Color(0xFF2A1B3D),
-                        Color(0xFF1E1E3F)
+                        Color(0xFFFEF3C7),  // Light yellow
+                        Color(0xFFFBCFE8),  // Light pink
+                        Color(0xFFDDD6FE)   // Light purple
                     ),
                     startY = gradientOffset,
                     endY = gradientOffset + 2000f
@@ -153,17 +153,17 @@ fun SignUpScreen(
             ) {
                 Divider(
                     modifier = Modifier.weight(1f),
-                    color = Color.White.copy(alpha = 0.2f)
+                    color = Color(0xFF6B7280).copy(alpha = 0.3f)
                 )
                 Text(
                     text = "OR SIGN UP WITH",
                     fontSize = 12.sp,
-                    color = Color.White.copy(alpha = 0.5f),
+                    color = Color(0xFF6B7280),
                     fontWeight = FontWeight.Medium
                 )
                 Divider(
                     modifier = Modifier.weight(1f),
-                    color = Color.White.copy(alpha = 0.2f)
+                    color = Color(0xFF6B7280).copy(alpha = 0.3f)
                 )
             }
 
@@ -182,12 +182,12 @@ fun SignUpScreen(
                 Text(
                     text = "Already have an account? ",
                     fontSize = 14.sp,
-                    color = Color.White.copy(alpha = 0.7f)
+                    color = Color(0xFF6B7280)
                 )
                 Text(
                     text = "Sign In",
                     fontSize = 14.sp,
-                    color = Color(0xFF7C3AED),
+                    color = Color(0xFF6366F1),
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.clickable { onNavigateToLogin() }
                 )
@@ -222,9 +222,9 @@ fun SignUpHeader() {
                 .background(
                     Brush.linearGradient(
                         colors = listOf(
-                            Color(0xFF7C3AED),
                             Color(0xFF6366F1),
-                            Color(0xFF8B5CF6)
+                            Color(0xFF8B5CF6),
+                            Color(0xFFEC4899)
                         )
                     )
                 ),
@@ -242,14 +242,14 @@ fun SignUpHeader() {
             text = "Create Account",
             fontSize = 28.sp,
             fontWeight = FontWeight.Bold,
-            color = Color.White,
+            color = Color(0xFF1F2937),
             letterSpacing = (-0.5).sp
         )
 
         Text(
             text = "Sign up to get started",
             fontSize = 14.sp,
-            color = Color.White.copy(alpha = 0.6f),
+            color = Color(0xFF6B7280),
             textAlign = TextAlign.Center
         )
     }
@@ -260,44 +260,49 @@ fun TabSelector(
     selectedTab: SignUpTab,
     onTabSelected: (SignUpTab) -> Unit
 ) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(16.dp))
-            .background(Color(0xFF262947))
-            .padding(4.dp),
-        horizontalArrangement = Arrangement.spacedBy(4.dp)
+    Surface(
+        color = Color.White.copy(alpha = 0.7f),
+        shape = RoundedCornerShape(16.dp),
+        shadowElevation = 2.dp
     ) {
-        SignUpTab.values().forEach { tab ->
-            val isSelected = selectedTab == tab
-            Box(
-                modifier = Modifier
-                    .weight(1f)
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(
-                        if (isSelected) {
-                            Brush.horizontalGradient(
-                                colors = listOf(
-                                    Color(0xFF7C3AED),
-                                    Color(0xFF6366F1)
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(4.dp),
+            horizontalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            SignUpTab.values().forEach { tab ->
+                val isSelected = selectedTab == tab
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(
+                            if (isSelected) {
+                                Brush.horizontalGradient(
+                                    colors = listOf(
+                                        Color(0xFF6366F1),
+                                        Color(0xFF8B5CF6),
+                                        Color(0xFFEC4899)
+                                    )
                                 )
-                            )
-                        } else {
-                            Brush.horizontalGradient(
-                                colors = listOf(Color.Transparent, Color.Transparent)
-                            )
-                        }
+                            } else {
+                                Brush.horizontalGradient(
+                                    colors = listOf(Color.Transparent, Color.Transparent)
+                                )
+                            }
+                        )
+                        .clickable { onTabSelected(tab) }
+                        .padding(vertical = 12.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = tab.name.lowercase().replaceFirstChar { it.uppercase() },
+                        fontSize = 14.sp,
+                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
+                        color = if (isSelected) Color.White else Color(0xFF6B7280)
                     )
-                    .clickable { onTabSelected(tab) }
-                    .padding(vertical = 12.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = tab.name.lowercase().replaceFirstChar { it.uppercase() },
-                    fontSize = 14.sp,
-                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
-                    color = if (isSelected) Color.White else Color.White.copy(alpha = 0.5f)
-                )
+                }
             }
         }
     }
@@ -398,7 +403,7 @@ fun SignUpFormFields(
                         Icon(
                             imageVector = if (passwordVisible) Icons.Default.VisibilityOff else Icons.Default.Visibility,
                             contentDescription = "Toggle password visibility",
-                            tint = Color.White.copy(alpha = 0.5f)
+                            tint = Color(0xFF9CA3AF)
                         )
                     }
                 }
@@ -418,7 +423,7 @@ fun SignUpFormFields(
                         Icon(
                             imageVector = if (confirmPasswordVisible) Icons.Default.VisibilityOff else Icons.Default.Visibility,
                             contentDescription = "Toggle password visibility",
-                            tint = Color.White.copy(alpha = 0.5f)
+                            tint = Color(0xFF9CA3AF)
                         )
                     }
                 },
@@ -452,8 +457,8 @@ fun CustomTextField(
         Text(
             text = label,
             fontSize = 13.sp,
-            fontWeight = FontWeight.Medium,
-            color = Color.White.copy(alpha = 0.7f)
+            fontWeight = FontWeight.SemiBold,
+            color = Color(0xFF374151)
         )
 
         OutlinedTextField(
@@ -463,7 +468,7 @@ fun CustomTextField(
             placeholder = {
                 Text(
                     text = placeholder,
-                    color = Color.White.copy(alpha = 0.3f),
+                    color = Color(0xFF9CA3AF),
                     fontSize = 14.sp
                 )
             },
@@ -471,7 +476,7 @@ fun CustomTextField(
                 Icon(
                     imageVector = leadingIcon,
                     contentDescription = null,
-                    tint = Color.White.copy(alpha = 0.5f),
+                    tint = Color(0xFF9CA3AF),
                     modifier = Modifier.size(20.dp)
                 )
             },
@@ -479,28 +484,40 @@ fun CustomTextField(
             visualTransformation = visualTransformation,
             keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
             colors = OutlinedTextFieldDefaults.colors(
-                focusedTextColor = Color.White,
-                unfocusedTextColor = Color.White,
-                focusedBorderColor = if (isError) Color(0xFFEF4444) else Color(0xFF7C3AED),
-                unfocusedBorderColor = Color.White.copy(alpha = 0.2f),
-                focusedContainerColor = Color(0xFF262947),
-                unfocusedContainerColor = Color(0xFF262947),
-                cursorColor = Color(0xFF7C3AED),
+                focusedTextColor = Color(0xFF1F2937),
+                unfocusedTextColor = Color(0xFF1F2937),
+                focusedBorderColor = if (isError) Color(0xFFEF4444) else Color(0xFF6366F1),
+                unfocusedBorderColor = Color(0xFFD1D5DB),
+                focusedContainerColor = Color.White.copy(alpha = 0.9f),
+                unfocusedContainerColor = Color.White.copy(alpha = 0.9f),
+                cursorColor = Color(0xFF6366F1),
                 errorBorderColor = Color(0xFFEF4444),
-                errorContainerColor = Color(0xFF262947)
+                errorContainerColor = Color.White.copy(alpha = 0.9f),
+                focusedLeadingIconColor = Color(0xFF6366F1)
             ),
-            shape = RoundedCornerShape(12.dp),
+            shape = RoundedCornerShape(14.dp),
             singleLine = true,
             isError = isError
         )
 
         if (isError && errorMessage != null) {
-            Text(
-                text = errorMessage,
-                fontSize = 12.sp,
-                color = Color(0xFFEF4444),
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
                 modifier = Modifier.padding(start = 4.dp)
-            )
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Error,
+                    contentDescription = null,
+                    tint = Color(0xFFEF4444),
+                    modifier = Modifier.size(14.dp)
+                )
+                Text(
+                    text = errorMessage,
+                    fontSize = 12.sp,
+                    color = Color(0xFFEF4444)
+                )
+            }
         }
     }
 }
@@ -514,8 +531,8 @@ fun GenderSelector(
         Text(
             text = "Gender",
             fontSize = 13.sp,
-            fontWeight = FontWeight.Medium,
-            color = Color.White.copy(alpha = 0.7f)
+            fontWeight = FontWeight.SemiBold,
+            color = Color(0xFF374151)
         )
 
         Row(
@@ -524,37 +541,45 @@ fun GenderSelector(
         ) {
             listOf("Male", "Female", "Other").forEach { gender ->
                 val isSelected = selectedGender == gender
-                Box(
+                Card(
                     modifier = Modifier
                         .weight(1f)
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(
-                            if (isSelected) {
-                                Brush.horizontalGradient(
-                                    colors = listOf(
-                                        Color(0xFF7C3AED),
-                                        Color(0xFF6366F1)
-                                    )
-                                )
-                            } else {
-                                Brush.horizontalGradient(
-                                    colors = listOf(
-                                        Color(0xFF262947),
-                                        Color(0xFF262947)
-                                    )
-                                )
-                            }
-                        )
-                        .clickable { onGenderSelected(gender) }
-                        .padding(vertical = 14.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = gender,
-                        fontSize = 14.sp,
-                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
-                        color = if (isSelected) Color.White else Color.White.copy(alpha = 0.5f)
+                        .clickable { onGenderSelected(gender) },
+                    shape = RoundedCornerShape(14.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = if (isSelected) Color.Transparent else Color.White.copy(alpha = 0.9f)
+                    ),
+                    elevation = CardDefaults.cardElevation(
+                        defaultElevation = if (isSelected) 0.dp else 2.dp
                     )
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(
+                                if (isSelected) {
+                                    Brush.horizontalGradient(
+                                        colors = listOf(
+                                            Color(0xFF6366F1),
+                                            Color(0xFF8B5CF6)
+                                        )
+                                    )
+                                } else {
+                                    Brush.horizontalGradient(
+                                        colors = listOf(Color.Transparent, Color.Transparent)
+                                    )
+                                }
+                            )
+                            .padding(vertical = 14.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = gender,
+                            fontSize = 14.sp,
+                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                            color = if (isSelected) Color.White else Color(0xFF6B7280)
+                        )
+                    }
                 }
             }
         }
@@ -575,39 +600,51 @@ fun PasswordStrengthIndicator(password: String) {
         else -> "Strong"
     }
 
-    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = strengthColor.copy(alpha = 0.1f)
+        )
+    ) {
+        Column(
+            modifier = Modifier.padding(12.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            Text(
-                text = "Password Strength",
-                fontSize = 12.sp,
-                color = Color.White.copy(alpha = 0.6f)
-            )
-            Text(
-                text = strengthText,
-                fontSize = 12.sp,
-                fontWeight = FontWeight.Bold,
-                color = strengthColor
-            )
-        }
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Password Strength",
+                    fontSize = 12.sp,
+                    color = Color(0xFF6B7280),
+                    fontWeight = FontWeight.Medium
+                )
+                Text(
+                    text = strengthText,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = strengthColor
+                )
+            }
 
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(6.dp)
-                .clip(RoundedCornerShape(3.dp))
-                .background(Color.White.copy(alpha = 0.1f))
-        ) {
             Box(
                 modifier = Modifier
-                    .fillMaxWidth(strength / 100f)
-                    .fillMaxHeight()
+                    .fillMaxWidth()
+                    .height(6.dp)
                     .clip(RoundedCornerShape(3.dp))
-                    .background(strengthColor)
-            )
+                    .background(Color(0xFFE5E7EB))
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth(strength / 100f)
+                        .fillMaxHeight()
+                        .clip(RoundedCornerShape(3.dp))
+                        .background(strengthColor)
+                )
+            }
         }
     }
 }
@@ -617,29 +654,40 @@ fun TermsCheckbox(
     checked: Boolean,
     onCheckedChange: (Boolean) -> Unit
 ) {
-    Row(
+    Card(
         modifier = Modifier
             .fillMaxWidth()
             .clickable { onCheckedChange(!checked) },
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(12.dp)
+        shape = RoundedCornerShape(14.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = Color.White.copy(alpha = 0.9f)
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
-        Checkbox(
-            checked = checked,
-            onCheckedChange = onCheckedChange,
-            colors = CheckboxDefaults.colors(
-                checkedColor = Color(0xFF7C3AED),
-                uncheckedColor = Color.White.copy(alpha = 0.3f),
-                checkmarkColor = Color.White
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Checkbox(
+                checked = checked,
+                onCheckedChange = onCheckedChange,
+                colors = CheckboxDefaults.colors(
+                    checkedColor = Color(0xFF6366F1),
+                    uncheckedColor = Color(0xFFD1D5DB),
+                    checkmarkColor = Color.White
+                )
             )
-        )
 
-        Text(
-            text = "I agree to the Terms & Conditions and Privacy Policy",
-            fontSize = 13.sp,
-            color = Color.White.copy(alpha = 0.7f),
-            lineHeight = 18.sp
-        )
+            Text(
+                text = "I agree to the Terms & Conditions and Privacy Policy",
+                fontSize = 13.sp,
+                color = Color(0xFF374151),
+                lineHeight = 18.sp
+            )
+        }
     }
 }
 
@@ -657,10 +705,13 @@ fun SignUpButton(
             .height(56.dp),
         colors = ButtonDefaults.buttonColors(
             containerColor = Color.Transparent,
-            disabledContainerColor = Color(0xFF262947)
+            disabledContainerColor = Color(0xFFE5E7EB)
         ),
         contentPadding = PaddingValues(0.dp),
-        shape = RoundedCornerShape(14.dp)
+        shape = RoundedCornerShape(14.dp),
+        elevation = ButtonDefaults.buttonElevation(
+            defaultElevation = if (enabled) 4.dp else 0.dp
+        )
     ) {
         Box(
             modifier = Modifier
@@ -669,15 +720,16 @@ fun SignUpButton(
                     if (enabled) {
                         Brush.horizontalGradient(
                             colors = listOf(
-                                Color(0xFF7C3AED),
-                                Color(0xFF6366F1)
+                                Color(0xFF6366F1),
+                                Color(0xFF8B5CF6),
+                                Color(0xFFEC4899)
                             )
                         )
                     } else {
                         Brush.horizontalGradient(
                             colors = listOf(
-                                Color(0xFF262947),
-                                Color(0xFF262947)
+                                Color(0xFFE5E7EB),
+                                Color(0xFFE5E7EB)
                             )
                         )
                     }
@@ -695,7 +747,7 @@ fun SignUpButton(
                     text = "Create Account",
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold,
-                    color = if (enabled) Color.White else Color.White.copy(alpha = 0.4f)
+                    color = if (enabled) Color.White else Color(0xFF9CA3AF)
                 )
             }
         }
@@ -709,18 +761,21 @@ fun SocialSignUpOptions() {
         horizontalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         SocialButton(
-            icon = Icons.Default.Email, // Gmail icon
+            icon = Icons.Default.Email,
             color = Color(0xFFDB4437),
+            label = "Google",
             modifier = Modifier.weight(1f)
         )
         SocialButton(
             icon = Icons.Default.Facebook,
             color = Color(0xFF1877F2),
+            label = "Facebook",
             modifier = Modifier.weight(1f)
         )
         SocialButton(
-            icon = Icons.Default.Android, // LinkedIn icon placeholder
+            icon = Icons.Default.Work,
             color = Color(0xFF0A66C2),
+            label = "LinkedIn",
             modifier = Modifier.weight(1f)
         )
     }
@@ -730,23 +785,32 @@ fun SocialSignUpOptions() {
 fun SocialButton(
     icon: ImageVector,
     color: Color,
+    label: String,
     modifier: Modifier = Modifier
 ) {
-    Box(
+    Card(
         modifier = modifier
             .height(56.dp)
-            .clip(RoundedCornerShape(14.dp))
-            .background(Color(0xFF262947))
-            .clickable { }
-            .padding(16.dp),
-        contentAlignment = Alignment.Center
+            .clickable { },
+        shape = RoundedCornerShape(14.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = Color.White.copy(alpha = 0.9f)
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
-        Icon(
-            imageVector = icon,
-            contentDescription = null,
-            tint = color,
-            modifier = Modifier.size(28.dp)
-        )
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(12.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = label,
+                tint = color,
+                modifier = Modifier.size(28.dp)
+            )
+        }
     }
 }
 
@@ -774,6 +838,7 @@ fun BoxScope.DecorativeBackgroundElements() {
         label = "offset2"
     )
 
+    // Yellow circle
     Box(
         modifier = Modifier
             .size(200.dp)
@@ -782,7 +847,7 @@ fun BoxScope.DecorativeBackgroundElements() {
             .background(
                 Brush.radialGradient(
                     colors = listOf(
-                        Color(0xFF7C3AED).copy(alpha = 0.15f),
+                        Color(0xFFFBBF24).copy(alpha = 0.2f),
                         Color.Transparent
                     )
                 )
@@ -790,6 +855,7 @@ fun BoxScope.DecorativeBackgroundElements() {
             .align(Alignment.TopStart)
     )
 
+    // Pink circle
     Box(
         modifier = Modifier
             .size(250.dp)
@@ -798,12 +864,29 @@ fun BoxScope.DecorativeBackgroundElements() {
             .background(
                 Brush.radialGradient(
                     colors = listOf(
-                        Color(0xFF6366F1).copy(alpha = 0.15f),
+                        Color(0xFFEC4899).copy(alpha = 0.15f),
                         Color.Transparent
                     )
                 )
             )
             .align(Alignment.TopEnd)
+    )
+
+    // Purple circle
+    Box(
+        modifier = Modifier
+            .size(180.dp)
+            .offset(x = 50.dp, y = offset1.dp)
+            .clip(CircleShape)
+            .background(
+                Brush.radialGradient(
+                    colors = listOf(
+                        Color(0xFF8B5CF6).copy(alpha = 0.15f),
+                        Color.Transparent
+                    )
+                )
+            )
+            .align(Alignment.BottomEnd)
     )
 }
 

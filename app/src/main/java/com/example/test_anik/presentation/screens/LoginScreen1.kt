@@ -3,6 +3,7 @@ package com.example.test_anik.presentation.screens
 // LoginScreen1.kt
 
 import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -21,6 +22,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -33,32 +35,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-
-// Color Palette for Design 1
-object AuthColors1 {
-    val PrimaryBlue = Color(0xFF6366F1)
-    val SecondaryPurple = Color(0xFF8B5CF6)
-    val AccentPink = Color(0xFFEC4899)
-    val DarkBackground = Color(0xFF0F172A)
-    val CardBackground = Color(0xFF1E293B)
-    val SurfaceLight = Color(0xFF334155)
-    val TextPrimary = Color(0xFFFFFFFF)
-    val TextSecondary = Color(0xFF94A3B8)
-    val ErrorRed = Color(0xFFEF4444)
-    val SuccessGreen = Color(0xFF22C55E)
-
-    val GradientPrimary = Brush.linearGradient(
-        colors = listOf(PrimaryBlue, SecondaryPurple, AccentPink)
-    )
-
-    val GradientBackground = Brush.verticalGradient(
-        colors = listOf(
-            DarkBackground,
-            Color(0xFF1A1A2E),
-            DarkBackground
-        )
-    )
-}
 
 // Login Type Enum
 enum class LoginType {
@@ -91,11 +67,36 @@ fun ModernLoginScreen1(
 
     val focusManager = LocalFocusManager.current
 
+    // Animated background gradient
+    val infiniteTransition = rememberInfiniteTransition(label = "background")
+    val gradientOffset by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = 1000f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(10000, easing = LinearEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "gradient"
+    )
+
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(AuthColors1.GradientBackground)
+            .background(
+                Brush.verticalGradient(
+                    colors = listOf(
+                        Color(0xFFFEF3C7),  // Light yellow
+                        Color(0xFFFBCFE8),  // Light pink
+                        Color(0xFFDDD6FE)   // Light purple
+                    ),
+                    startY = gradientOffset,
+                    endY = gradientOffset + 2000f
+                )
+            )
     ) {
+        // Decorative circles
+        LoginDecorativeElements()
+
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -114,13 +115,13 @@ fun ModernLoginScreen1(
                 text = "Welcome Back",
                 style = MaterialTheme.typography.headlineLarge,
                 fontWeight = FontWeight.Bold,
-                color = AuthColors1.TextPrimary
+                color = Color(0xFF1F2937)
             )
 
             Text(
                 text = "Sign in to continue",
                 style = MaterialTheme.typography.bodyLarge,
-                color = AuthColors1.TextSecondary
+                color = Color(0xFF6B7280)
             )
 
             Spacer(modifier = Modifier.height(32.dp))
@@ -141,8 +142,9 @@ fun ModernLoginScreen1(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(24.dp),
                 colors = CardDefaults.cardColors(
-                    containerColor = AuthColors1.CardBackground.copy(alpha = 0.8f)
-                )
+                    containerColor = Color.White.copy(alpha = 0.95f)
+                ),
+                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
             ) {
                 Column(
                     modifier = Modifier.padding(24.dp),
@@ -187,7 +189,7 @@ fun ModernLoginScreen1(
                                     else
                                         Icons.Outlined.Visibility,
                                     contentDescription = "Toggle password visibility",
-                                    tint = AuthColors1.TextSecondary
+                                    tint = Color(0xFF9CA3AF)
                                 )
                             }
                         },
@@ -219,13 +221,13 @@ fun ModernLoginScreen1(
                                 checked = rememberMe,
                                 onCheckedChange = { rememberMe = it },
                                 colors = CheckboxDefaults.colors(
-                                    checkedColor = AuthColors1.PrimaryBlue,
-                                    uncheckedColor = AuthColors1.TextSecondary
+                                    checkedColor = Color(0xFF6366F1),
+                                    uncheckedColor = Color(0xFFD1D5DB)
                                 )
                             )
                             Text(
                                 text = "Remember me",
-                                color = AuthColors1.TextSecondary,
+                                color = Color(0xFF374151),
                                 style = MaterialTheme.typography.bodyMedium
                             )
                         }
@@ -233,7 +235,7 @@ fun ModernLoginScreen1(
                         TextButton(onClick = onForgotPasswordClick) {
                             Text(
                                 text = "Forgot Password?",
-                                color = AuthColors1.PrimaryBlue,
+                                color = Color(0xFF6366F1),
                                 fontWeight = FontWeight.SemiBold
                             )
                         }
@@ -263,16 +265,17 @@ fun ModernLoginScreen1(
             ) {
                 HorizontalDivider(
                     modifier = Modifier.weight(1f),
-                    color = AuthColors1.SurfaceLight
+                    color = Color(0xFF6B7280).copy(alpha = 0.3f)
                 )
                 Text(
                     text = "  OR CONTINUE WITH  ",
-                    color = AuthColors1.TextSecondary,
-                    style = MaterialTheme.typography.bodySmall
+                    color = Color(0xFF6B7280),
+                    style = MaterialTheme.typography.bodySmall,
+                    fontWeight = FontWeight.Medium
                 )
                 HorizontalDivider(
                     modifier = Modifier.weight(1f),
-                    color = AuthColors1.SurfaceLight
+                    color = Color(0xFF6B7280).copy(alpha = 0.3f)
                 )
             }
 
@@ -290,12 +293,12 @@ fun ModernLoginScreen1(
             ) {
                 Text(
                     text = "Don't have an account? ",
-                    color = AuthColors1.TextSecondary
+                    color = Color(0xFF6B7280)
                 )
                 TextButton(onClick = onRegisterClick) {
                     Text(
                         text = "Sign Up",
-                        color = AuthColors1.PrimaryBlue,
+                        color = Color(0xFF6366F1),
                         fontWeight = FontWeight.Bold
                     )
                 }
@@ -307,12 +310,107 @@ fun ModernLoginScreen1(
 }
 
 @Composable
+fun BoxScope.LoginDecorativeElements() {
+    val infiniteTransition = rememberInfiniteTransition(label = "decorations")
+
+    val offset1 by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = 30f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(4000, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "offset1"
+    )
+
+    val offset2 by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = -30f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(5000, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "offset2"
+    )
+
+    // Yellow circle
+    Box(
+        modifier = Modifier
+            .size(150.dp)
+            .offset(x = (-40).dp, y = 100.dp + offset1.dp)
+            .clip(CircleShape)
+            .background(
+                Brush.radialGradient(
+                    colors = listOf(
+                        Color(0xFFFBBF24).copy(alpha = 0.3f),
+                        Color.Transparent
+                    )
+                )
+            )
+            .align(Alignment.TopStart)
+    )
+
+    // Pink circle
+    Box(
+        modifier = Modifier
+            .size(180.dp)
+            .offset(x = 80.dp, y = (-60).dp + offset2.dp)
+            .clip(CircleShape)
+            .background(
+                Brush.radialGradient(
+                    colors = listOf(
+                        Color(0xFFEC4899).copy(alpha = 0.2f),
+                        Color.Transparent
+                    )
+                )
+            )
+            .align(Alignment.TopEnd)
+    )
+
+    // Purple circle
+    Box(
+        modifier = Modifier
+            .size(140.dp)
+            .offset(x = (-20).dp, y = offset1.dp)
+            .clip(CircleShape)
+            .background(
+                Brush.radialGradient(
+                    colors = listOf(
+                        Color(0xFF8B5CF6).copy(alpha = 0.25f),
+                        Color.Transparent
+                    )
+                )
+            )
+            .align(Alignment.BottomStart)
+    )
+}
+
+@Composable
 fun GradientLogo1() {
+    val scale by rememberInfiniteTransition(label = "logo").animateFloat(
+        initialValue = 1f,
+        targetValue = 1.05f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(2000, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "scale"
+    )
+
     Box(
         modifier = Modifier
             .size(100.dp)
+            .scale(scale)
             .clip(CircleShape)
-            .background(AuthColors1.GradientPrimary),
+            .background(
+                Brush.linearGradient(
+                    colors = listOf(
+                        Color(0xFF6366F1),
+                        Color(0xFF8B5CF6),
+                        Color(0xFFEC4899)
+                    )
+                )
+            ),
         contentAlignment = Alignment.Center
     ) {
         Icon(
@@ -329,40 +427,50 @@ fun LoginTypeSelector1(
     selectedType: LoginType,
     onTypeSelected: (LoginType) -> Unit
 ) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(16.dp))
-            .background(AuthColors1.CardBackground.copy(alpha = 0.6f))
-            .padding(4.dp),
-        horizontalArrangement = Arrangement.SpaceEvenly
+    Surface(
+        color = Color.White.copy(alpha = 0.8f),
+        shape = RoundedCornerShape(16.dp),
+        shadowElevation = 2.dp
     ) {
-        LoginType.entries.forEach { type ->
-            val isSelected = type == selectedType
-            Box(
-                modifier = Modifier
-                    .weight(1f)
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(
-                        if (isSelected) AuthColors1.GradientPrimary
-                        else Brush.linearGradient(
-                            listOf(Color.Transparent, Color.Transparent)
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(4.dp),
+            horizontalArrangement = Arrangement.SpaceEvenly
+        ) {
+            LoginType.entries.forEach { type ->
+                val isSelected = type == selectedType
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(
+                            if (isSelected) Brush.horizontalGradient(
+                                colors = listOf(
+                                    Color(0xFF6366F1),
+                                    Color(0xFF8B5CF6),
+                                    Color(0xFFEC4899)
+                                )
+                            )
+                            else Brush.linearGradient(
+                                listOf(Color.Transparent, Color.Transparent)
+                            )
                         )
+                        .clickable { onTypeSelected(type) }
+                        .padding(vertical = 12.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = when (type) {
+                            LoginType.EMAIL -> "Email"
+                            LoginType.PHONE -> "Phone"
+                            LoginType.USERNAME -> "Username"
+                        },
+                        color = if (isSelected) Color.White else Color(0xFF6B7280),
+                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
+                        style = MaterialTheme.typography.bodyMedium
                     )
-                    .clickable { onTypeSelected(type) }
-                    .padding(vertical = 12.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = when (type) {
-                        LoginType.EMAIL -> "Email"
-                        LoginType.PHONE -> "Phone"
-                        LoginType.USERNAME -> "Username"
-                    },
-                    color = if (isSelected) Color.White else AuthColors1.TextSecondary,
-                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
-                    style = MaterialTheme.typography.bodyMedium
-                )
+                }
             }
         }
     }
@@ -388,7 +496,7 @@ fun GradientOutlinedTextField1(
             Icon(
                 imageVector = leadingIcon,
                 contentDescription = null,
-                tint = AuthColors1.TextSecondary
+                tint = Color(0xFF9CA3AF)
             )
         },
         trailingIcon = trailingIcon,
@@ -400,15 +508,18 @@ fun GradientOutlinedTextField1(
         keyboardActions = keyboardActions,
         singleLine = true,
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
+        shape = RoundedCornerShape(14.dp),
         colors = OutlinedTextFieldDefaults.colors(
-            focusedBorderColor = AuthColors1.PrimaryBlue,
-            unfocusedBorderColor = AuthColors1.SurfaceLight,
-            focusedLabelColor = AuthColors1.PrimaryBlue,
-            unfocusedLabelColor = AuthColors1.TextSecondary,
-            cursorColor = AuthColors1.PrimaryBlue,
-            focusedTextColor = AuthColors1.TextPrimary,
-            unfocusedTextColor = AuthColors1.TextPrimary
+            focusedBorderColor = Color(0xFF6366F1),
+            unfocusedBorderColor = Color(0xFFD1D5DB),
+            focusedLabelColor = Color(0xFF6366F1),
+            unfocusedLabelColor = Color(0xFF9CA3AF),
+            cursorColor = Color(0xFF6366F1),
+            focusedTextColor = Color(0xFF1F2937),
+            unfocusedTextColor = Color(0xFF1F2937),
+            focusedContainerColor = Color.White,
+            unfocusedContainerColor = Color.White,
+            focusedLeadingIconColor = Color(0xFF6366F1)
         )
     )
 }
@@ -426,22 +537,31 @@ fun GradientButton1(
         modifier = Modifier
             .fillMaxWidth()
             .height(56.dp),
-        shape = RoundedCornerShape(16.dp),
+        shape = RoundedCornerShape(14.dp),
         colors = ButtonDefaults.buttonColors(
             containerColor = Color.Transparent,
-            disabledContainerColor = Color.Transparent
+            disabledContainerColor = Color(0xFFE5E7EB)
         ),
-        contentPadding = PaddingValues()
+        contentPadding = PaddingValues(),
+        elevation = ButtonDefaults.buttonElevation(
+            defaultElevation = if (enabled) 4.dp else 0.dp
+        )
     ) {
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .background(
-                    if (enabled) AuthColors1.GradientPrimary
+                    if (enabled) Brush.horizontalGradient(
+                        colors = listOf(
+                            Color(0xFF6366F1),
+                            Color(0xFF8B5CF6),
+                            Color(0xFFEC4899)
+                        )
+                    )
                     else Brush.linearGradient(
                         listOf(
-                            AuthColors1.SurfaceLight,
-                            AuthColors1.SurfaceLight
+                            Color(0xFFE5E7EB),
+                            Color(0xFFE5E7EB)
                         )
                     )
                 ),
@@ -456,7 +576,7 @@ fun GradientButton1(
             } else {
                 Text(
                     text = text,
-                    color = Color.White,
+                    color = if (enabled) Color.White else Color(0xFF9CA3AF),
                     fontWeight = FontWeight.Bold,
                     fontSize = 16.sp
                 )
@@ -471,27 +591,30 @@ fun SocialLoginRow1(
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceEvenly
+        horizontalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         SocialLoginButton1(
-            icon = Icons.Default.Email, // Replace with Google icon
+            icon = Icons.Default.Email,
             contentDescription = "Google",
             backgroundColor = Color(0xFFDB4437),
-            onClick = { onSocialLoginClick("google") }
+            onClick = { onSocialLoginClick("google") },
+            modifier = Modifier.weight(1f)
         )
 
         SocialLoginButton1(
-            icon = Icons.Default.Facebook, // Replace with Facebook icon
+            icon = Icons.Default.Facebook,
             contentDescription = "Facebook",
             backgroundColor = Color(0xFF4267B2),
-            onClick = { onSocialLoginClick("facebook") }
+            onClick = { onSocialLoginClick("facebook") },
+            modifier = Modifier.weight(1f)
         )
 
         SocialLoginButton1(
-            icon = Icons.Default.Work, // Replace with LinkedIn icon
+            icon = Icons.Default.Work,
             contentDescription = "LinkedIn",
             backgroundColor = Color(0xFF0A66C2),
-            onClick = { onSocialLoginClick("linkedin") }
+            onClick = { onSocialLoginClick("linkedin") },
+            modifier = Modifier.weight(1f)
         )
     }
 }
@@ -501,23 +624,32 @@ fun SocialLoginButton1(
     icon: ImageVector,
     contentDescription: String,
     backgroundColor: Color,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
-    Box(
-        modifier = Modifier
-            .size(60.dp)
-            .clip(CircleShape)
-            .background(backgroundColor.copy(alpha = 0.1f))
-            .border(1.dp, backgroundColor.copy(alpha = 0.3f), CircleShape)
+    Card(
+        modifier = modifier
+            .height(56.dp)
             .clickable(onClick = onClick),
-        contentAlignment = Alignment.Center
+        shape = RoundedCornerShape(14.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = Color.White.copy(alpha = 0.9f)
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
-        Icon(
-            imageVector = icon,
-            contentDescription = contentDescription,
-            tint = backgroundColor,
-            modifier = Modifier.size(28.dp)
-        )
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(12.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = contentDescription,
+                tint = backgroundColor,
+                modifier = Modifier.size(28.dp)
+            )
+        }
     }
 }
 
@@ -543,11 +675,36 @@ fun ModernRegistrationScreen1(
     val focusManager = LocalFocusManager.current
     val passwordsMatch = password == confirmPassword || confirmPassword.isEmpty()
 
+    // Animated background gradient
+    val infiniteTransition = rememberInfiniteTransition(label = "background")
+    val gradientOffset by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = 1000f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(10000, easing = LinearEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "gradient"
+    )
+
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(AuthColors1.GradientBackground)
+            .background(
+                Brush.verticalGradient(
+                    colors = listOf(
+                        Color(0xFFFEF3C7),
+                        Color(0xFFFBCFE8),
+                        Color(0xFFDDD6FE)
+                    ),
+                    startY = gradientOffset,
+                    endY = gradientOffset + 2000f
+                )
+            )
     ) {
+        // Decorative circles
+        LoginDecorativeElements()
+
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -566,13 +723,13 @@ fun ModernRegistrationScreen1(
                 text = "Create Account",
                 style = MaterialTheme.typography.headlineLarge,
                 fontWeight = FontWeight.Bold,
-                color = AuthColors1.TextPrimary
+                color = Color(0xFF1F2937)
             )
 
             Text(
                 text = "Fill in your details to get started",
                 style = MaterialTheme.typography.bodyLarge,
-                color = AuthColors1.TextSecondary
+                color = Color(0xFF6B7280)
             )
 
             Spacer(modifier = Modifier.height(24.dp))
@@ -582,8 +739,9 @@ fun ModernRegistrationScreen1(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(24.dp),
                 colors = CardDefaults.cardColors(
-                    containerColor = AuthColors1.CardBackground.copy(alpha = 0.8f)
-                )
+                    containerColor = Color.White.copy(alpha = 0.95f)
+                ),
+                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
             ) {
                 Column(
                     modifier = Modifier.padding(24.dp),
@@ -641,7 +799,7 @@ fun ModernRegistrationScreen1(
                                     else
                                         Icons.Outlined.Visibility,
                                     contentDescription = "Toggle password visibility",
-                                    tint = AuthColors1.TextSecondary
+                                    tint = Color(0xFF9CA3AF)
                                 )
                             }
                         },
@@ -675,7 +833,7 @@ fun ModernRegistrationScreen1(
                                     else
                                         Icons.Outlined.Visibility,
                                     contentDescription = "Toggle password visibility",
-                                    tint = AuthColors1.TextSecondary
+                                    tint = Color(0xFF9CA3AF)
                                 )
                             }
                         },
@@ -699,41 +857,55 @@ fun ModernRegistrationScreen1(
                             Icon(
                                 imageVector = Icons.Default.Error,
                                 contentDescription = null,
-                                tint = AuthColors1.ErrorRed,
+                                tint = Color(0xFFEF4444),
                                 modifier = Modifier.size(16.dp)
                             )
                             Text(
                                 text = "Passwords do not match",
-                                color = AuthColors1.ErrorRed,
+                                color = Color(0xFFEF4444),
                                 style = MaterialTheme.typography.bodySmall
                             )
                         }
                     }
 
                     // Terms & Conditions
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.clickable { acceptTerms = !acceptTerms }
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { acceptTerms = !acceptTerms },
+                        shape = RoundedCornerShape(12.dp),
+                        colors = CardDefaults.cardColors(
+                            containerColor = Color(0xFFF3F4F6)
+                        )
                     ) {
-                        Checkbox(
-                            checked = acceptTerms,
-                            onCheckedChange = { acceptTerms = it },
-                            colors = CheckboxDefaults.colors(
-                                checkedColor = AuthColors1.PrimaryBlue,
-                                uncheckedColor = AuthColors1.TextSecondary
+                        Row(
+                            modifier = Modifier.padding(12.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Checkbox(
+                                checked = acceptTerms,
+                                onCheckedChange = { acceptTerms = it },
+                                colors = CheckboxDefaults.colors(
+                                    checkedColor = Color(0xFF6366F1),
+                                    uncheckedColor = Color(0xFFD1D5DB)
+                                )
                             )
-                        )
-                        Text(
-                            text = "I agree to the ",
-                            color = AuthColors1.TextSecondary,
-                            style = MaterialTheme.typography.bodySmall
-                        )
-                        Text(
-                            text = "Terms & Conditions",
-                            color = AuthColors1.PrimaryBlue,
-                            style = MaterialTheme.typography.bodySmall,
-                            fontWeight = FontWeight.SemiBold
-                        )
+                            Column {
+                                Row {
+                                    Text(
+                                        text = "I agree to the ",
+                                        color = Color(0xFF6B7280),
+                                        style = MaterialTheme.typography.bodySmall
+                                    )
+                                    Text(
+                                        text = "Terms & Conditions",
+                                        color = Color(0xFF6366F1),
+                                        style = MaterialTheme.typography.bodySmall,
+                                        fontWeight = FontWeight.SemiBold
+                                    )
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -765,16 +937,17 @@ fun ModernRegistrationScreen1(
             ) {
                 HorizontalDivider(
                     modifier = Modifier.weight(1f),
-                    color = AuthColors1.SurfaceLight
+                    color = Color(0xFF6B7280).copy(alpha = 0.3f)
                 )
                 Text(
                     text = "  OR SIGN UP WITH  ",
-                    color = AuthColors1.TextSecondary,
-                    style = MaterialTheme.typography.bodySmall
+                    color = Color(0xFF6B7280),
+                    style = MaterialTheme.typography.bodySmall,
+                    fontWeight = FontWeight.Medium
                 )
                 HorizontalDivider(
                     modifier = Modifier.weight(1f),
-                    color = AuthColors1.SurfaceLight
+                    color = Color(0xFF6B7280).copy(alpha = 0.3f)
                 )
             }
 
@@ -792,12 +965,12 @@ fun ModernRegistrationScreen1(
             ) {
                 Text(
                     text = "Already have an account? ",
-                    color = AuthColors1.TextSecondary
+                    color = Color(0xFF6B7280)
                 )
                 TextButton(onClick = onLoginClick) {
                     Text(
                         text = "Sign In",
-                        color = AuthColors1.PrimaryBlue,
+                        color = Color(0xFF6366F1),
                         fontWeight = FontWeight.Bold
                     )
                 }
@@ -812,37 +985,55 @@ fun ModernRegistrationScreen1(
 fun PasswordStrengthIndicator1(password: String) {
     val strength = calculatePasswordStrength(password)
     val (color, label) = when {
-        strength < 0.33f -> AuthColors1.ErrorRed to "Weak"
-        strength < 0.66f -> Color(0xFFFFA500) to "Medium"
-        else -> AuthColors1.SuccessGreen to "Strong"
+        strength < 0.33f -> Color(0xFFEF4444) to "Weak"
+        strength < 0.66f -> Color(0xFFF59E0B) to "Medium"
+        else -> Color(0xFF10B981) to "Strong"
     }
 
-    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Text(
-                text = "Password Strength",
-                style = MaterialTheme.typography.bodySmall,
-                color = AuthColors1.TextSecondary
-            )
-            Text(
-                text = label,
-                style = MaterialTheme.typography.bodySmall,
-                color = color,
-                fontWeight = FontWeight.SemiBold
-            )
-        }
-        LinearProgressIndicator(
-            progress = { strength },
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(4.dp)
-                .clip(RoundedCornerShape(2.dp)),
-            color = color,
-            trackColor = AuthColors1.SurfaceLight
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = color.copy(alpha = 0.1f)
         )
+    ) {
+        Column(
+            modifier = Modifier.padding(12.dp),
+            verticalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    text = "Password Strength",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = Color(0xFF6B7280),
+                    fontWeight = FontWeight.Medium
+                )
+                Text(
+                    text = label,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = color,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(6.dp)
+                    .clip(RoundedCornerShape(3.dp))
+                    .background(Color(0xFFE5E7EB))
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth(strength)
+                        .fillMaxHeight()
+                        .clip(RoundedCornerShape(3.dp))
+                        .background(color)
+                )
+            }
+        }
     }
 }
 

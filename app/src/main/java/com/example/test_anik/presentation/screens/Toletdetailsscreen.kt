@@ -1,4 +1,4 @@
-package com.example.test_anik.presentation.screens.tolet
+package com.example.test_anik.presentation.screens
 
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*

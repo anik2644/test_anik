@@ -27,6 +27,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavHostController
+import com.example.test_anik.presentation.navigation.ToLetScreen
 import kotlinx.coroutines.delay
 
 // Data Models
@@ -55,7 +57,10 @@ data class UpdateItem(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreen(modifier: Modifier = Modifier) {
+fun HomeScreen(
+    modifier: Modifier = Modifier,
+    navController: NavHostController
+) {
     var selectedCategory by remember { mutableStateOf("All") }
     val categories = getCategories()
     val updates = getRecentUpdates()
@@ -113,7 +118,7 @@ fun HomeScreen(modifier: Modifier = Modifier) {
                         color = Color(0xFF1F2937),
                         modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp)
                     )
-                    CategoryCardsSection(categories = categories)
+                    CategoryCardsSection(categories = categories, navController = navController)
                 }
 
                 // Quick Stats - Updated with Blood Donation stat
@@ -323,7 +328,10 @@ fun WelcomeSection() {
 }
 
 @Composable
-fun CategoryCardsSection(categories: List<Category>) {
+fun CategoryCardsSection(
+    categories: List<Category>,
+    navController: NavHostController
+) {
     LazyRow(
         contentPadding = PaddingValues(horizontal = 20.dp),
         horizontalArrangement = Arrangement.spacedBy(16.dp)
@@ -341,14 +349,17 @@ fun CategoryCardsSection(categories: List<Category>) {
                 enter = fadeIn(animationSpec = tween(500)) +
                         scaleIn(initialScale = 0.8f)
             ) {
-                CategoryCard(category = category)
+                CategoryCard(category = category, navController = navController)
             }
         }
     }
 }
 
 @Composable
-fun CategoryCard(category: Category) {
+fun CategoryCard(
+    category: Category,
+    navController: NavHostController
+) {
     val scale = remember { Animatable(1f) }
 
     Card(
@@ -357,7 +368,9 @@ fun CategoryCard(category: Category) {
             .height(180.dp)
             .scale(scale.value)
             .clickable {
-                // Handle click
+                if (category.name == "To-Let") {
+                    navController.navigate(ToLetScreen.ToLetList.route)
+                }
             },
         shape = RoundedCornerShape(20.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
@@ -422,21 +435,21 @@ fun QuickStatsSection() {
         Row(
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            StatCard(
+            StatCard2(
                 title = "Active",
                 value = "248",
                 icon = Icons.Default.List,
                 color = Color(0xFF10B981),
                 modifier = Modifier.weight(1f)
             )
-            StatCard(
+            StatCard2(
                 title = "Saved",
                 value = "52",
                 icon = Icons.Default.Favorite,
                 color = Color(0xFFEF4444),
                 modifier = Modifier.weight(1f)
             )
-            StatCard(
+            StatCard2(
                 title = "Views",
                 value = "1.2K",
                 icon = Icons.Default.RemoveRedEye,
@@ -513,50 +526,7 @@ fun BloodDonationQuickCard() {
     }
 }
 
-@Composable
-fun StatCard(
-    title: String,
-    value: String,
-    icon: ImageVector,
-    color: Color,
-    modifier: Modifier = Modifier
-) {
-    Card(
-        modifier = modifier.height(90.dp),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = Color.White.copy(alpha = 0.9f)
-        ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(12.dp),
-            verticalArrangement = Arrangement.SpaceBetween
-        ) {
-            Icon(
-                imageVector = icon,
-                contentDescription = null,
-                tint = color,
-                modifier = Modifier.size(24.dp)
-            )
-            Column {
-                Text(
-                    text = value,
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color(0xFF1F2937)
-                )
-                Text(
-                    text = title,
-                    fontSize = 12.sp,
-                    color = Color(0xFF6B7280)
-                )
-            }
-        }
-    }
-}
+
 
 @Composable
 fun FilterTabs(

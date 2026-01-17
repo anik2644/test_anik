@@ -4,50 +4,28 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
 import androidx.navigation.NavHostController
-import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.navArgument
 import com.example.test_anik.presentation.screens.*
 
 @Composable
-fun BottomBarNavGraph(
+fun ToLetNavGraph(
     navController: NavHostController,
-    onLogout: () -> Unit = {}
+    onBackToHome: () -> Unit
 ) {
-    // Shared properties list that persists across navigation
-    val propertiesList = remember {
-        mutableStateListOf<ToLetProperty>().apply {
-            addAll(getToLetProperties())
-        }
-    }
+    // This will hold our properties across navigation
+    val propertiesList = remember { mutableStateListOf<ToLetProperty>().apply {
+        addAll(getToLetProperties())
+    } }
 
     NavHost(
         navController = navController,
-        startDestination = BottomBarScreen.Home.route,
+        startDestination = ToLetScreen.ToLetList.route
     ) {
-        composable(route = BottomBarScreen.Home.route) {
-            HomeScreen(navController = navController)
-        }
-        composable(route = BottomBarScreen.Chat.route) {
-            ChatScreen()
-        }
-        composable(route = BottomBarScreen.Notification.route) {
-            NotificationScreen()
-        }
-        composable(route = BottomBarScreen.Profile.route) {
-            ProfileScreen(
-                onLogoutClick = onLogout
-            )
-        }
-
-        // To-Let List Screen
-        composable(route = ToLetScreen.ToLetList.route) {
+        composable(ToLetScreen.ToLetList.route) {
             ToLetListScreen(
                 properties = propertiesList,
-                onBackClick = {
-                    navController.popBackStack()
-                },
+                onBackClick = onBackToHome,
                 onPropertyClick = { property ->
                     navController.navigate(ToLetScreen.ToLetDetails.createRoute(property.id))
                 },
@@ -57,12 +35,8 @@ fun BottomBarNavGraph(
             )
         }
 
-        // To-Let Details Screen
-        composable(
-            route = ToLetScreen.ToLetDetails.route,
-            arguments = listOf(navArgument("propertyId") { type = NavType.IntType })
-        ) { backStackEntry ->
-            val propertyId = backStackEntry.arguments?.getInt("propertyId")
+        composable(ToLetScreen.ToLetDetails.route) { backStackEntry ->
+            val propertyId = backStackEntry.arguments?.getString("propertyId")?.toIntOrNull()
             val property = propertiesList.find { it.id == propertyId }
 
             property?.let {
@@ -72,14 +46,13 @@ fun BottomBarNavGraph(
                         navController.popBackStack()
                     },
                     onBookClick = {
-                        // Handle booking action
+                        // Handle booking
                     }
                 )
             }
         }
 
-        // Add To-Let Screen
-        composable(route = ToLetScreen.AddToLet.route) {
+        composable(ToLetScreen.AddToLet.route) {
             AddToLetScreen(
                 onBackClick = {
                     navController.popBackStack()
